@@ -1,0 +1,771 @@
+---
+title: "Empowering IR with R: Hands-On Workshop"
+author: "Evan Cortens, PhD"
+date: "November 6, 2016"
+output: 
+  revealjs::revealjs_presentation:
+    incremental: true
+    theme: serif
+    transition: slide
+    reveal_options:
+      width: 1000
+      height: 900
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Why use R?
+
+## Why use R?
+* Free
+* Open-source
+* A "statistical" programming language
+    * Generally accepted by academic statisticians
+    * Thoroughly grounded in statistical theory
+* A great community
+    * Help and support
+    * Innovation and development
+    
+## Some history
+* Based on the S programming language
+    * Dates from the late 1970s, substantially revised in the late 1980s
+    * (there is still a commercial version, S-PLUS)
+* R was developed at the University of Auckland
+    * Ross Ihaka and Robert Gentleman
+    * First developed in 1993
+    * Stable public release in 2000
+* RStudio
+    * IDE, generally recognized as high quality, even outside R
+    * Development began in 2008, first public release in February 2011
+    * 1.0 release on Tuesday last week!
+
+## Some history
+Why is this relevant?
+
+* You'll likely notice some quirks in R that differ from other programming languages you make have worked in--the unique history often explains why.
+* Explains R's position as a "statistical programming language":
+    * Think stats/data first, programming second.
+
+# Today's approach/Learning outcomes
+
+## Today's approach/Learning outcomes
+In learning R today, we'll take an approach, used in *R for Data Science* (Wickham & Grolemund, 2016), diagrammed like this:
+
+![](http://r4ds.had.co.nz/diagrams/data-science.png)
+
+One of the strengths of R: every step of this workflow can be done using it!
+
+## Import
+* Loading the data!
+* For IR-type tasks, this will generally be from data files or directly from databases.
+* Other possibilities include web APIs, or even web scraping
+
+## Tidy
+* "Tidy data" (Wickham, 2014)
+    * Each column is a variable, each row is an observation.
+* Doing this kind of work up front, right after loading, lets you focus on the modelling/analysis/visualization problem at hand, rather than having to rework your data at each stage of your analysis.
+
+## Transform/Visualize/Model
+>* Repeat these three steps as necessary:
+
+## Transform
+* Together with tidying, sometimes called _data wrangling_
+    * Filtering (selecting specific observations)
+    * Mutating (creating new variables)
+    * Summarizing (means, counts, etc)
+
+## Visualise
+>* For both exploratory purposes and production/communication
+
+## Model
+>* Complementary to visualisation
+>* For the "precise exploration" of "specific questions"
+
+## Communicate
+* The final output, whether it's just for yourself, your colleagues, or a wider audience
+* Increasingly, there's a trend toward "reproducible research" which integrates even the communciation step (final paper, report, etc) into the code/analysis.
+
+# Housekeeping
+
+## Installing R and RStudio
+* https://cran.r-project.org/
+* https://www.rstudio.com/products/rstudio/download3/#download
+
+* install.packages('tidyverse')
+
+## Basic R
+* An interpreted language (like Python)
+* Code can be run as:
+    * scripts (programatically/non-interactively)
+    * from the prompt (interactively)
+* R uses an REPL (Read-Evaluate-Print Loop) just like Python
+    * Using R as a calculator (demonstration)
+    
+# Outline
+
+## Outline
+1. Visualisation
+2. Transformation
+3. Importing and 'wrangling'
+4. Hands-on portion using what we've learned
+
+# Visualisation
+
+## Let's load our package
+```{r}
+library(tidyverse)
+```
+
+A package only needs to be installed once (per version), but must be 'loaded' every time.
+
+## The 'mpg' data set
+Data on the fuel efficiency of 38 models of cars from the US EPA:
+
+```{r}
+mpg
+```
+
+## The Grammar of Graphics
+* Layers
+* Inheritance
+* Mapping (`aes`)
+
+## Our First Plot
+* A car's highway mileage (mpg) vs its engine size (displacement in litres).
+* What might the relationship be?
+
+## Our First Plot
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy))
+```
+
+* As engine size increases, fuel efficiency decreases, roughly.
+
+## Exercises
+* Make a scatterplot of `hwy` vs `cyl`.
+* What about a scatterplot of `class` vs `drv`?
+
+## Hwy vs cyl
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = hwy, y = cyl))
+```
+
+## Class vs drv
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = class, y = drv))
+```
+
+What's going on here? Is this useful? How might we make it more useful?
+
+## Additional aesthetics
+What about those outliers? Use the `color` aesthetic.
+
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, color = class))
+```
+
+## 'Unmapped' aesthetics
+What's happening here?
+
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy), color = "blue")
+```
+
+## What's gone wrong?
+What's happened here? What colour are the points? Why?
+
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, color = "blue"))
+```
+
+## Exercises
+>* `mpg` variable types: which are categorical, which are continuous?
+>* `?mpg`
+>* Map a continuous variable to colour, size, and shape: how are these aesthetics different for categorical vs continuous?
+>* What happens if you map an aesthetic to something other than a variable name, like `aes(color = displ < 5)`?
+
+## Facets: One Variable
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) + 
+  facet_wrap(~ class, nrow = 2)
+```
+
+## Facets: Two Variables
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) + 
+  facet_grid(drv ~ cyl)
+```
+
+## Other "geoms" (geometries)
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy))
+```
+
+## Smooth
+```{r}
+ggplot(data = mpg) + 
+  geom_smooth(mapping = aes(x = displ, y = hwy))
+```
+
+## Smooth aesthetics
+```{r}
+ggplot(data = mpg) + 
+  geom_smooth(mapping = aes(x = displ, y = hwy, linetype = drv))
+```
+
+## Which aesthetics to geoms have?
+`?geom_smooth`
+
+## Clearer?
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, color = drv)) +
+  geom_smooth(mapping = aes(x = displ, y = hwy, color = drv, linetype = drv))
+```
+
+## Reducing Duplication
+```{r}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy, color = drv)) + 
+  geom_point() +
+  geom_smooth(mapping = aes(linetype = drv))
+```
+
+## Exercise: Recreate:
+```{r,echo=FALSE}
+ggplot(mpg, aes(x=displ, y=hwy)) +
+  geom_point() +
+  geom_smooth(se=FALSE)
+```
+
+## Exercise: Recreate:
+```{r,echo=FALSE}
+ggplot(mpg, aes(x=displ, y=hwy, color=drv)) +
+  geom_point() +
+  geom_smooth(aes(color=NULL), se=FALSE)
+```
+
+## Exercise: Recreate:
+```{r,echo=FALSE}
+ggplot(mpg, aes(x=displ, y=hwy, color=drv)) +
+  geom_point() +
+  geom_smooth(se=FALSE)
+```
+
+## One last visualization
+```{r}
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, fill = clarity), position = "dodge")
+```
+
+# Coding basics
+
+## R as a calculator
+```{r}
+1 / 200 * 30
+```
+
+```{r}
+(59 + 73 + 2) / 3
+```
+
+```{r}
+sin(pi / 2)
+```
+
+## Assignments
+```{r}
+x <- 3 * 4
+```
+
+## Calling functions
+R functions, in general:
+```
+function_name(arg1 = val1, arg2 = val2, ...)
+```
+
+An example function, `seq`:
+```{r}
+seq(1, 10)
+```
+
+# Transformation
+
+## dplyr basics
+* Pick observations by their values (`filter()`).
+* Reorder the rows (`arrange()`).
+* Pick variables by their names (`select()`).
+* Create new variables with functions of existing variables (`mutate()`).
+* Collapse many values down to a single summary (`summarise()`).
+
+* Can be used in conjunction with `group_by()`
+
+## NYC Flights
+```{r}
+# install.packages('nycflights13') # install this package if you don't have it already
+library(nycflights13)
+```
+
+## NYC Flights
+```{r}
+flights
+```
+
+What do we see here?
+
+## Filter rows
+
+```{r}
+filter(flights, month == 1, day == 1)
+```
+
+## Comparison operators
+
+```
+>
+>=
+<
+<=
+!=
+==
+```
+
+What will this do?
+
+```
+filter(flights, month = 1)
+```
+
+
+## Logical operators
+
+![](http://r4ds.had.co.nz/diagrams/transform-logical.png)
+
+Complete set of boolean operations. `x` is the left-hand circle, `y` is the right-hand circle, and the shaded regions show which parts each operator selects.
+
+_How can we find flights that departed in November or December?_
+
+## Missing data
+```{r}
+NA > 5
+```
+
+```{r}
+10 == NA
+```
+
+```{r}
+NA + 10
+```
+
+What about this?
+
+```
+NA / 2
+```
+
+## Filtering and NAs
+
+```{r}
+x <- NA
+is.na(x)
+```
+
+`filter()` only includes rows where the condition is `TRUE`; it excludes both `FALSE` and `NA` values. If you want to preserve missing values, ask for them explicitly:
+
+```{r}
+df <- tibble(x = c(1, NA, 3))
+filter(df, x > 1)
+```
+
+```{r}
+filter(df, is.na(x) | x > 1)
+```
+
+## Exercises
+
+* Find all flights that
+    * Had an arrival delay of two or more hours
+    * Flew to Houston (IAH or HOU)
+    * Were operated by United, American, or Delta
+    * Departed in summer (July, August, and September)
+    * Arrived more than two hours late, but didn’t leave late
+    * Were delayed by at least an hour, but made up over 30 minutes in flight
+    * Departed between midnight and 6am (inclusive)
+* How many flights have a missing `dep_time`? What other variables are missing? What might these rows represent?
+
+## Arranging rows
+```{r}
+arrange(flights, year, month, day)
+```
+
+```{r}
+arrange(flights, desc(arr_delay))
+```
+
+## Selecting columns
+```{r}
+select(flights, year, month, day)
+```
+
+```{r}
+select(flights, year:day)
+```
+
+## Select helper functions
+* There are a number of helper functions you can use within select():
+    * `starts_with("abc")`: matches names that begin with "abc".
+    * `ends_with("xyz")`: matches names that end with "xyz".
+    * `contains("ijk")`: matches names that contain "ijk".
+    * `matches("(.)\\1")`: selects variables that match a regular expression.
+    * `num_range("x", 1:3)`: matches x1, x2 and x3.
+    * `one_of(vector)`: columns whose names are in said vector.
+
+## Add new variables with mutate
+```{r}
+flights_sml <- select(flights, 
+  year:day, 
+  ends_with("delay"), 
+  distance, 
+  air_time
+)
+
+mutate(flights_sml,
+  gain = arr_delay - dep_delay,
+  speed = distance / air_time * 60
+)
+```
+
+## Useful "mutations"
+* Arithmetic: `+, -, *, /, ^`
+* Modular arithmetic: `%/%` (integer division), `%%` (remainder)
+* Logs: `log(), log2(), log10()`
+* Offsets: `lead()`, `lag()`
+* Cumulative and rolling aggregates: `cumsum()`, `cumprod()`, `cummin()`, `cummax()`, `cummean()`
+* Logical comparisons: `<, <=, >, >=, !=, ==`
+* Ranking: `min_rank()`, `row_number()`, `dense_rank()`, `percent_rank()`, `cume_dist()`, `ntile()`
+* `ifelse()`
+* `decode()`
+
+## Dealing with vectors...
+```{r}
+c(1,2,3)
+```
+
+```{r}
+1:3
+```
+
+## Dealing with vectors...
+```{r}
+1:3 + 1:9
+```
+
+What about...
+
+```
+1:3 + 1:10
+```
+
+## Dealing with vectors...
+```{r}
+1:3 + 1:10
+```
+
+What happened?
+
+## Summarising
+```{r}
+summarise(flights, delay = mean(dep_delay, na.rm = TRUE))
+```
+
+## Summarising, with groups
+```{r}
+by_day <- group_by(flights, year, month, day)
+summarise(by_day, delay = mean(dep_delay, na.rm = TRUE))
+```
+
+## Combining operations
+A new variable for each step gets cumbersome, so `dplyr` provides an operator, the pipe (`%>%`) that combines operations:
+
+```{r}
+flights %>%
+  group_by(year, month, day) %>%
+  summarise(delay = mean(dep_delay, na.rm = TRUE)) %>%
+  head(5)
+```
+
+`x %>% f(y)` turns into `f(x, y)`, and `x %>% f(y) %>% g(z)` turns into `g(f(x, y), z)` etc.
+
+## Missing values
+Let's come back to that `na.rm()` from above:
+
+```{r}
+mean(c(1,2,3))
+```
+
+What do we expect here?
+
+```
+mean(c(1,NA,3))
+```
+
+## Missing values
+```{r}
+mean(c(1,NA,3))
+```
+
+```{r}
+mean(c(1,NA,3), na.rm = TRUE)
+```
+
+## Counts
+```{r}
+flights %>%
+  group_by(month) %>%
+  summarise(n = n())
+```
+
+## Counts, shorthand:
+```{r}
+flights %>%
+  count(month)
+```
+
+## Useful summarising functions:
+* `mean(x)`, `median(x)`
+* `sd(x)`, `IQR(x)` (interquartile range), `mad(x)` (median absolute deviation)
+* `min(x)`, `max(x)`, `quantile(x, 0.25)`
+* `first(x)`, `nth(x, 2)`, `last(x)`
+* `n(x)`, `n_distinct(x)`
+* Counts and proportions of logical values: `sum(x > 10)`, `mean(y == 0)`
+    * `TRUE` is converted to `1` and `FALSE` to `0`
+
+## Logical sums
+Number of flights before 5:00am:
+```{r}
+flights %>% 
+  filter(!is.na(dep_delay), !is.na(arr_delay)) %>%
+  group_by(year, month, day) %>% 
+  summarise(n_early = sum(dep_time < 500))
+```
+
+## Grouped mutates
+```{r}
+flights %>%
+  filter(!is.na(arr_delay)) %>%
+  group_by(year, month) %>%
+  summarise(n_delayed = sum(arr_delay > 30)) %>%
+  group_by(year) %>%
+  mutate(
+    n_delayed_year = sum(n_delayed),
+    pct = (n_delayed / n_delayed_year) * 100
+    )
+```
+
+# Some statistical tests
+
+## Loading Data
+* From a text file (CSV, tab delimited, etc) file
+    * The `readr` package is likely best.
+* From an SPSS file (or Stata or SAS)
+    * I recommend `haven` for this.
+* Directly from a database
+    * Depends on the database. Best to use an abstraction layer like `DBI` or `RODBC`/`RJDBC`.
+
+## Let's dig in
+1. Create an RStudio Project
+2. [Google: "machine learning student performance"](https://www.google.ca/search?q=machine+learning+student+performance)
+3. [UCI Machine Learning Repository](https://archive.ics.uci.edu/ml/datasets/Student+Performance)
+4. [Download the data](https://archive.ics.uci.edu/ml/machine-learning-databases/00320/student.zip)
+5. Unzip student.zip into the directory where you created the RStudio project
+    * You'll have two files: student-mat.csv (math grades) and student-por.csv (Portuguese grades)
+
+## Loading
+
+```{r}
+students <- read_delim("student-mat.csv", delim=";")
+```
+
+`read_delim()` is just letting us know which variable types the columns have been parsed as; this can be overridden using `col_types`. See the help file (`?read_delim`) for more info.
+
+## Basic statistical functions
+>* t-test
+>* Correlation
+>* Chi-square
+>* Basic linear models
+
+## t-test
+Is there difference in the mean first period grade for men and women significant?
+
+```{r}
+t.test(G1 ~ sex, data = students) # using formula notation
+```
+
+Likely not: *p* > 0.05.
+
+## Correlation
+Are first period grades and second period grades correlated?
+
+```{r}
+cor(students$G1, students$G2) # passing vectors
+```
+
+By default, `cor()` returns Pearson's *r*. These grades appear highly correlated.
+
+## Correlation
+R can also run this as a statistical test of correlation:
+
+```{r}
+cor.test(students$G1, students$G2)
+```
+
+*p* < 0.001, narrow confidence interval for *r*, we can feel pretty confident about this correlation.
+
+## Chi-squared test
+Does there appear to be a difference between the address (urban vs rural) and family size (3 or fewer members, or more than 3 members)?
+
+```{r}
+table(students$address, students$famsize) # simple crosstab
+```
+
+```{r}
+chisq.test(table(students$address, students$famsize)) # pass the table to chisq.test()
+```
+
+Chi-squared test not significant, *p* > 0.05.
+
+## Chi-squared test
+We might also want to examine the residuals, in which case we need to save the results of the test to a variable:
+```{r}
+chisq_results <- chisq.test(table(students$address, students$famsize))
+```
+
+Simple residuals:
+```{r}
+chisq_results$observed - chisq_results$expected
+```
+
+## Chi-squared test
+Pearson residuals (SPSS calls these "standardized residuals"):
+```{r}
+chisq_results$residuals
+```
+
+Standardized residuals (SPSS calls these "adjusted standardized residuals"):
+```{r}
+chisq_results$stdres
+```
+
+## Simple linear models
+Second period grade predicted by first period grade:
+
+```{r}
+lm(G2 ~ G1, data = students)
+```
+
+The plain output of `lm()` isn't terribly useful, best to save to a variable and run `summary()`.
+
+## Simple linear models
+<div style="font-size:0.8em">
+
+```{r}
+lm_results <- lm(G2 ~ G1, data = students)
+summary(lm_results)
+```
+
+</div>
+
+Now we see residual distribution, t-tests on the coefficients, R<sup>2</sup>, and the results of the F-test.
+
+We can see that this model explains a large portion of the variance (Adjusted R<sup>2</sup>: 0.7254) and that G1 and G2 are strongly colinear--unsurprising given the results of the earlier correlation test.
+
+## The `broom` package
+
+In R, the output of the various modelling an dtesting functions is usually in the form of a list. This list is then printed directly to the console or can be passed to a function like `summary()`, as we saw above. However, for programmatic, rather than interactive, uses, it can be awkward to deal with these lists. Enter `broom`, a package designed to convert model outputs into tidy data frames.
+
+```{r}
+library(broom)
+```
+
+`broom` has three main functions:
+
+* `tidy()`: coefficient level output
+* `glance()`: model level output (e.g., R<sup>2</sup> in a linear model)
+* `augment()`: data level output (e.g., in a linear model, actuals and residuals)
+    
+## `tidy()`
+
+```{r}
+lm_results <- lm(G2 ~ G1, data = students)
+
+tidy(lm_results)
+```
+
+Result: a data frame of the coefficients in the model.
+
+## `glance()`
+
+```{r}
+glance(lm_results)
+```
+
+Result: a data frame with columns for "model level" data, like R<sup>2</sup>, the result of the F-test (`statistic` and `p.value`), etc.
+
+## `augment()`
+
+```{r}
+head(augment(lm_results), 10) # just the first 10 rows
+```
+
+Result: a data frame with the "input" values (G2 and G1) and then the results of fitting the model.
+
+## `broom` in action
+
+Where `broom` really shines is as part of a `dplyr` workflow, like we looked at above.
+
+Run a series of linear models predicting G2 from G1 by sex and school:
+
+```{r}
+students %>%
+  group_by(sex, school) %>%
+  do(tidy(lm(G2 ~ G1, data = .)))
+```
+
+# Additional Resources
+
+## Online Resources
+
+Start here:
+
+>* http://r4ds.had.co.nz/
+>* http://stat545.com/
+
+Additional:
+
+>* http://adv-r.had.co.nz/
+>* http://r-pkgs.had.co.nz/
+>* http://swcarpentry.github.io/r-novice-inflammation/
+
+For help/community:
+
+>* http://stackoverflow.com/questions/tagged/r
+>* https://twitter.com/search?q=%23rstats
+
+## Print Books
+>* https://us.sagepub.com/en-us/nam/discovering-statistics-using-r/book236067%20
+>* https://us.sagepub.com/en-us/nam/an-r-companion-to-applied-regression/book233899
+>* http://shop.oreilly.com/product/0636920028574.do
+
+## References
+>* Wickham, Hadley (2014). https://www.jstatsoft.org/article/view/v059i10
